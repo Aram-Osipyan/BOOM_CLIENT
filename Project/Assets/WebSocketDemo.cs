@@ -7,7 +7,10 @@ using HybridWebSocket;
 using System.Net.Sockets;
 using System;
 using UnityEngine.UI;
-using System.Text.Json;
+//using System.Text.Json;
+//using System.Text.Json.Serialization;
+using SendModels;
+
 public class WebSocketDemo : MonoBehaviour {
 
     // Use this for initialization
@@ -15,9 +18,8 @@ public class WebSocketDemo : MonoBehaviour {
     
     void Start () 
     {
-        CreateConnection();
-        //StartCoroutine(EverySec(20));
-        
+        CreateConnection();      
+
     }
 	void CreateConnection()
     {
@@ -25,6 +27,7 @@ public class WebSocketDemo : MonoBehaviour {
         ws = WebSocketFactory.CreateInstance("ws://localhost:3000/cable");
         //WebSocketFactory.CreateInstance("").
         // Add OnOpen event listener
+     
         ws.OnOpen += () =>
         {
             Debug.Log("WS connected!");
@@ -63,23 +66,32 @@ public class WebSocketDemo : MonoBehaviour {
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //ws.Send(Encoding.UTF8.GetBytes("{ id: \"ChatChannel\", room: \"Best Room\" }"));
-            string text = "{\"command\" : \"subscribe\",\"identifier\" : \"{\"channel\" : \"ChatChannel\" }\"}";
-            ws.Send(GetComponent<Text>().text);
-            
+
+   
+            Channel channel = new Channel("ChatChannel");            
+            Subscribe sb = new Subscribe("subscribe",JsonUtility.ToJson(channel));
+            ws.Send(JsonUtility.ToJson(sb));
         }
-	}
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            Data data = new Data();
+            data.action = "recieve";
+            Channel channel = new Channel("ChatChannel");
+
+            Subscribe sb = new Subscribe("message", JsonUtility.ToJson(channel),JsonUtility.ToJson(data));
+            ws.Send(JsonUtility.ToJson(sb));
+        }
+	}   
     IEnumerator EverySec(int secs)
     {
         for (int i = 0; i < secs; i++)
         {
-            //ws.Send(Encoding.UTF8.GetBytes("Hello from Unity 3D!"));
             Debug.Log("send");
             yield return new WaitForSeconds(1);
         }
     }
     private void OnDestroy()
     {
-        ws.Close();
+        ws?.Close();
     }
 }
