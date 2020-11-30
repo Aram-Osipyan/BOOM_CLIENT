@@ -5,6 +5,7 @@ using UnityEngine;
 using HybridWebSocket;
 using System.Text;
 using SendModels;
+using UnityEngine.UI;
 
 public class SyncPosition : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class SyncPosition : MonoBehaviour
     /// Time in seconds
     /// </summary>
     [SerializeField] float timeBetweenSend = 1f;
+    [SerializeField] Text statusText;
     private float dTime;
     SendUtility sendUtility;
     void Start()
@@ -22,10 +24,25 @@ public class SyncPosition : MonoBehaviour
     private void WebSocketInit()
     {
         sendUtility = new SendUtility();
-        sendUtility.ConnectToServer();
-        sendUtility.SubscribeToChannel("PlayerPositionSyncChannel");
+        sendUtility.recieve = Recieve;
+        StartCoroutine(Connect());        
     }
 
+    IEnumerator Connect()
+    {
+        sendUtility.ConnectToServer();
+        statusText.text = "Status: " + sendUtility.webSocket.GetState();
+        while (true)
+        {
+            yield return new WaitForSeconds(0.5f);
+            statusText.text = "Status: " + sendUtility.webSocket.GetState();            
+            if (sendUtility.webSocket.GetState() == WebSocketState.Open)
+            {
+                break;
+            }            
+        }
+        sendUtility.SubscribeToChannel("PlayerPositionSyncChannel");
+    }
     private void Recieve(byte[] data)
     {
         Debug.Log("WS received message: " + Encoding.UTF8.GetString(data));
@@ -43,10 +60,16 @@ public class SyncPosition : MonoBehaviour
 
     private void SendPositionData()
     {
-        PositionData data = new PositionData("recieve",transform.position);
+        if (sendUtility.webSocket.GetState() != WebSocketState.Open)
+            return;
+        PositionData data = new PositionData("recieve",new PositionData.PositionVector3( transform.position));
         Channel channel = new Channel("PlayerPositionSyncChannel");
 
         Subscribe sb = new Subscribe("message", JsonUtility.ToJson(channel), JsonUtility.ToJson(data));
         sendUtility.Send(JsonUtility.ToJson(sb));   
+    }
+    private void OnDestroy()
+    {
+        sendUtility.webSocket.Close();
     }
 }

@@ -32,13 +32,26 @@ namespace SendModels
         {
             action = _action;
         }    
-    }
+    }    
 
     [Serializable]
     class PositionData : Data
     {
-        Vector3 position;
-        public PositionData(string _action,Vector3 _position) : base(_action)
+        [Serializable]
+        public class PositionVector3
+        {
+            public float x;
+            public float y;
+            public float z;
+            public PositionVector3(Vector3 _position)
+            {
+                x = _position.x;
+                y = _position.y;
+                z = _position.z;
+            }
+        }
+        public PositionVector3 position;
+        public PositionData(string _action, PositionVector3 _position) : base(_action)
         {
             position = _position;
         }
