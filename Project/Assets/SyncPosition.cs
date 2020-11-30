@@ -8,9 +8,12 @@ using SendModels;
 
 public class SyncPosition : MonoBehaviour
 {
+    /// <summary>
+    /// Time in seconds
+    /// </summary>
     [SerializeField] float timeBetweenSend = 1f;
     private float dTime;
-    WebSocket ws;
+    SendUtility sendUtility;
     void Start()
     {        
         WebSocketInit();
@@ -18,48 +21,15 @@ public class SyncPosition : MonoBehaviour
 
     private void WebSocketInit()
     {
-        ws = WebSocketFactory.CreateInstance(SendModels.RemoteSettings.rootUrl);
-        ws.OnOpen += () =>
-        {
-            Debug.Log("WS connected!");
-            Debug.Log("WS state: " + ws.GetState().ToString());
-
-            //ws.Send(Encoding.UTF8.GetBytes("Hello from Unity 3D!"));
-
-        };
-
-        // Add OnMessage event listener
-        ws.OnMessage += (byte[] msg) =>
-        {
-            Debug.Log("WS received message: " + Encoding.UTF8.GetString(msg));
-
-            //ws.Close();
-        };
-
-        // Add OnError event listener
-        ws.OnError += (string errMsg) =>
-        {
-            Debug.Log("WS error: " + errMsg);
-        };
-
-        // Add OnClose event listener
-        ws.OnClose += (WebSocketCloseCode code) =>
-        {
-            Debug.Log("WS closed with code: " + code.ToString());
-        };
-
-        // Connect to the server
-        ws.Connect();
-        SubscribeToChannel();
+        sendUtility = new SendUtility();
+        sendUtility.ConnectToServer();
+        sendUtility.SubscribeToChannel("PlayerPositionSyncChannel");
     }
 
-    private void SubscribeToChannel()
+    private void Recieve(byte[] data)
     {
-        Channel channel = new Channel("ChatChannel");
-        Subscribe sb = new Subscribe("subscribe", JsonUtility.ToJson(channel));
-        ws.Send(JsonUtility.ToJson(sb));
+        Debug.Log("WS received message: " + Encoding.UTF8.GetString(data));
     }
-
     void Update()
     {
         // for sending every timeBetweenSend seconds 
@@ -73,11 +43,10 @@ public class SyncPosition : MonoBehaviour
 
     private void SendPositionData()
     {
-        Data data = new Data();
-        data.action = "recieve";
-        Channel channel = new Channel("ChatChannel");
+        PositionData data = new PositionData("recieve",transform.position);
+        Channel channel = new Channel("PlayerPositionSyncChannel");
 
         Subscribe sb = new Subscribe("message", JsonUtility.ToJson(channel), JsonUtility.ToJson(data));
-        ws.Send(JsonUtility.ToJson(sb));
+        sendUtility.Send(JsonUtility.ToJson(sb));   
     }
 }

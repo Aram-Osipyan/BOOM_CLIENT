@@ -28,8 +28,22 @@ namespace SendModels
     class Data
     {
         public string action;
-        public string some = "hello";
+        public Data(string _action)
+        {
+            action = _action;
+        }    
     }
+
+    [Serializable]
+    class PositionData : Data
+    {
+        Vector3 position;
+        public PositionData(string _action,Vector3 _position) : base(_action)
+        {
+            position = _position;
+        }
+    }
+    
 
     [Serializable]
     class Channel

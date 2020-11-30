@@ -74,8 +74,7 @@ public class WebSocketDemo : MonoBehaviour {
         }
         if (Input.GetKeyDown(KeyCode.W))
         {
-            Data data = new Data();
-            data.action = "recieve";
+            Data data = new Data("recieve");
             Channel channel = new Channel("ChatChannel");
 
             Subscribe sb = new Subscribe("message", JsonUtility.ToJson(channel),JsonUtility.ToJson(data));
