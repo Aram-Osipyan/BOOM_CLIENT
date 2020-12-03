@@ -12,6 +12,8 @@ class SendUtility
     public WebSocket webSocket { private set; get; }
     public string channel { get; private set; }
     public Action<byte[]> recieve { get; set; }
+
+    //$"ws://localhost:3000/cable?token={token}"
     public void ConnectToServer(string rootUrl = SendModels.RemoteSettings.rootUrl)
     {
         webSocket = WebSocketFactory.CreateInstance(rootUrl);

@@ -9,6 +9,8 @@ namespace SendModels
     public static class RemoteSettings
     {
         public const string rootUrl = "ws://localhost:3000/cable";
+        public const string authorithateUrl = "http://localhost:3000/player_token";
+        public const string authentificateUrl = "http://localhost:3000/player";
     }
     [Serializable]
     class Subscribe
@@ -67,5 +69,72 @@ namespace SendModels
             channel = _channel;
         }
         //public string room;
+    }
+
+    /*
+     {
+    "player":{
+        "name":"Aram",
+        "password":"12345"
+    }
+}
+     */
+    [Serializable]
+    class Authentificate
+    {
+        [Serializable]
+        public class Player
+        {
+            public string name;
+            public string password;
+            public Player(string _name, string _password)
+            {
+                name = _name;
+                password = _password;
+            }
+        }
+        public Player player;
+        public Authentificate(string _name, string _password)
+        {
+            player = new Player(_name, _password);
+        }
+
+    }
+    /*
+     {
+    "auth":{
+        "name":"Aram",
+        "password":"12345"
+    }
+    }
+     */
+    [Serializable]
+    class Authorithate
+    {
+        [Serializable]
+        public class Auth
+        {
+            public string name;
+            public string password;
+            public Auth(string _name,string _password)
+            {
+                name = _name;
+                password = _password;
+            }
+        }
+        public Auth auth;
+        public Authorithate(string _name, string _password)
+        {
+            auth = new Auth(_name, _password);
+        }
+    }
+    class JWT
+    {
+        public string jwt;
+    }
+    class PlayerInfo
+    {
+        public string id;
+        public string name;
     }
 }

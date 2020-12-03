@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define DEBUG_SYNC_POS
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,12 +14,15 @@ public class SyncPosition : MonoBehaviour
     /// Time in seconds
     /// </summary>
     [SerializeField] float timeBetweenSend = 1f;
+#if DEBUG_SYNC_POS
     [SerializeField] Text statusText;
+#endif
+    
     private float dTime;
     SendUtility sendUtility;
     void Start()
     {        
-        WebSocketInit();
+        
     }
 
     private void WebSocketInit()
@@ -30,12 +34,18 @@ public class SyncPosition : MonoBehaviour
 
     IEnumerator Connect()
     {
-        sendUtility.ConnectToServer();
+
+
+        sendUtility.ConnectToServer($"ws://localhost:3000/cable?token={GameManager.instance.token}");
+#if DEBUG_SYNC_POS
         statusText.text = "Status: " + sendUtility.webSocket.GetState();
+#endif
         while (true)
         {
             yield return new WaitForSeconds(0.5f);
-            statusText.text = "Status: " + sendUtility.webSocket.GetState();            
+#if DEBUG_SYNC_POS
+            statusText.text = "Status: " + sendUtility.webSocket.GetState();
+#endif
             if (sendUtility.webSocket.GetState() == WebSocketState.Open)
             {
                 break;
