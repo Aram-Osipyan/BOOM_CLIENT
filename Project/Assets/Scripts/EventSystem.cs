@@ -82,7 +82,9 @@ public class EventSystem : MonoBehaviour
             var jwt = JsonUtility.FromJson<SendModels.JWT>(uwr.downloadHandler.text);
             GameManager.instance.token = jwt.jwt;
             Debug.Log("Received: " + uwr.downloadHandler.text);
-            forClose.SetActive(false);
+            forClose.SetActive(false);// Close auth form
+            GameManager.instance.GameStart();// start SyncPosition script
+
         }
     }
     public void Authentificate()

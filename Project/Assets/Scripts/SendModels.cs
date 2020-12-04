@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SendModels
 {
-    
+
     public static class RemoteSettings
     {
         public const string rootUrl = "ws://localhost:3000/cable";
@@ -33,8 +33,8 @@ namespace SendModels
         public Data(string _action)
         {
             action = _action;
-        }    
-    }    
+        }
+    }
 
     [Serializable]
     class PositionData : Data
@@ -45,20 +45,26 @@ namespace SendModels
             public float x;
             public float y;
             public float z;
-            public PositionVector3(Vector3 _position)
+            public PositionVector3()
+            {
+                (x, y, z) = (0, 0, 0);
+            }
+            public void SetPos(Vector3 _position)
             {
                 x = _position.x;
                 y = _position.y;
                 z = _position.z;
             }
         }
+
+
         public PositionVector3 position;
-        public PositionData(string _action, PositionVector3 _position) : base(_action)
+        public PositionData(string _action) : base(_action)
         {
-            position = _position;
+            position = new PositionVector3();
         }
     }
-    
+
 
     [Serializable]
     class Channel
@@ -116,7 +122,7 @@ namespace SendModels
         {
             public string name;
             public string password;
-            public Auth(string _name,string _password)
+            public Auth(string _name, string _password)
             {
                 name = _name;
                 password = _password;
@@ -136,5 +142,7 @@ namespace SendModels
     {
         public string id;
         public string name;
-    }
+    }    
+    
+
 }

@@ -13,16 +13,25 @@ public class SyncPosition : MonoBehaviour
     /// <summary>
     /// Time in seconds
     /// </summary>
-    [SerializeField] float timeBetweenSend = 1f;
+    [SerializeField] float timeBetweenSend = 0.1f;
+    [SerializeField] PlayerData playerData;
+    
 #if DEBUG_SYNC_POS
     [SerializeField] Text statusText;
 #endif
     
     private float dTime;
-    SendUtility sendUtility;
+    private SendUtility sendUtility;
+    private PositionData data;
+    private Channel channel = new Channel("PlayerPositionSyncChannel");
+    private Subscribe sb ;
+    private List<GameObject> playersInstance;
     void Start()
-    {        
-        
+    {
+        Debug.Log("Start");
+        sb = new Subscribe("message", JsonUtility.ToJson(channel));
+        data = new PositionData("recieve");
+        WebSocketInit();
     }
 
     private void WebSocketInit()
@@ -34,8 +43,6 @@ public class SyncPosition : MonoBehaviour
 
     IEnumerator Connect()
     {
-
-
         sendUtility.ConnectToServer($"ws://localhost:3000/cable?token={GameManager.instance.token}");
 #if DEBUG_SYNC_POS
         statusText.text = "Status: " + sendUtility.webSocket.GetState();
@@ -55,6 +62,24 @@ public class SyncPosition : MonoBehaviour
     }
     private void Recieve(byte[] data)
     {
+        var mes = JsonUtility.FromJson<RecieveModels.PositionMessage>(Encoding.UTF8.GetString(data));
+        if (playersInstance == null)
+        {
+            playersInstance = new List<GameObject>();
+            foreach (var item in mes.message.players)
+            {
+                if (item.position != null)
+                {
+                    playersInstance.Add(Instantiate(playerData.players[0]));
+                }
+            }
+            
+        }
+        for (int i = 0; i < playersInstance.Count; i++)
+        {
+            var pos = mes.message.players[i].position;
+            playersInstance[i].transform.position = new Vector3(pos.x,pos.y,pos.z);
+        }
         Debug.Log("WS received message: " + Encoding.UTF8.GetString(data));
     }
     void Update()
@@ -72,10 +97,8 @@ public class SyncPosition : MonoBehaviour
     {
         if (sendUtility.webSocket.GetState() != WebSocketState.Open)
             return;
-        PositionData data = new PositionData("recieve",new PositionData.PositionVector3( transform.position));
-        Channel channel = new Channel("PlayerPositionSyncChannel");
-
-        Subscribe sb = new Subscribe("message", JsonUtility.ToJson(channel), JsonUtility.ToJson(data));
+        data.position.SetPos(transform.position);
+        sb.data = JsonUtility.ToJson(data);
         sendUtility.Send(JsonUtility.ToJson(sb));   
     }
     private void OnDestroy()

@@ -70,7 +70,7 @@ public class WebSocketDemo : MonoBehaviour {
    
             Channel channel = new Channel("ChatChannel");            
             Subscribe sb = new Subscribe("subscribe",JsonUtility.ToJson(channel));
-            ws.Send(JsonUtility.ToJson(sb));
+            //ws.Send(JsonUtility.ToJson(sb));
         }
         if (Input.GetKeyDown(KeyCode.W))
         {
@@ -78,7 +78,7 @@ public class WebSocketDemo : MonoBehaviour {
             Channel channel = new Channel("ChatChannel");
 
             Subscribe sb = new Subscribe("message", JsonUtility.ToJson(channel),JsonUtility.ToJson(data));
-            ws.Send(JsonUtility.ToJson(sb));
+            //ws.Send(JsonUtility.ToJson(sb));
         }
 	}   
     IEnumerator EverySec(int secs)
