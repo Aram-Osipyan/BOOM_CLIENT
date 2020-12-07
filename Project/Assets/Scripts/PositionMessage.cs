@@ -35,12 +35,8 @@ namespace RecieveModels
 
         }
 
-        [Serializable]
-        public class Message{
-            public Player[] players;
-        }
         public string identifier;
-        public Message message;
+        public string[] message;
     }
 
 }

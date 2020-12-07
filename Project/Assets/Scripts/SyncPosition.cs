@@ -1,4 +1,5 @@
 ﻿//#define DEBUG_SYNC_POS
+#define DEBUG_SERVER_CONNECT
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,14 +8,13 @@ using HybridWebSocket;
 using System.Text;
 using SendModels;
 using UnityEngine.UI;
-
 public class SyncPosition : MonoBehaviour
 {
     /// <summary>
     /// Time in seconds
     /// </summary>
-    [SerializeField] float timeBetweenSend = 0.1f;
-    [SerializeField] PlayerData playerData;
+    [SerializeField] float timeBetweenSend = 1f;
+    public int playersCount = 5; 
     
 #if DEBUG_SYNC_POS
     [SerializeField] Text statusText;
@@ -25,15 +25,34 @@ public class SyncPosition : MonoBehaviour
     private PositionData data;
     private Channel channel = new Channel("PlayerPositionSyncChannel");
     private Subscribe sb ;
-    private List<GameObject> playersInstance;
+    private Dictionary<string, GameObject> playersInstance = new Dictionary<string, GameObject>();
+    private List<GameObject> playersPool;
+    private int playerPoiner = 0;
     void Start()
     {
         Debug.Log("Start");
         sb = new Subscribe("message", JsonUtility.ToJson(channel));
         data = new PositionData("recieve");
         WebSocketInit();
+        PlayersInstatiate();
     }
 
+    private void PlayersInstatiate()
+    {
+        playersPool = new List<GameObject>(playersCount);
+        for(int i = 0; i<playersCount; ++i)
+        {
+            playersPool[i] = Instantiate(GameManager.instance.playerData.players[0]);
+        }
+    }
+    private GameObject PlayerInstantiate()
+    {
+        if (playerPoiner>6)
+        {
+            throw new Exception("error in player instantiate");
+        }
+        return playersPool[playerPoiner++];
+    }
     private void WebSocketInit()
     {
         sendUtility = new SendUtility();
@@ -60,27 +79,48 @@ public class SyncPosition : MonoBehaviour
         }
         sendUtility.SubscribeToChannel("PlayerPositionSyncChannel");
     }
+    
     private void Recieve(byte[] data)
     {
-        var mes = JsonUtility.FromJson<RecieveModels.PositionMessage>(Encoding.UTF8.GetString(data));
-        if (playersInstance == null)
+        var jsonData = Encoding.UTF8.GetString(data);
+        if (!jsonData.Contains("ping"))
         {
-            playersInstance = new List<GameObject>();
-            foreach (var item in mes.message.players)
+            var mes = JsonUtility.FromJson<RecieveModels.PositionMessage>(jsonData);
+            foreach (var item in mes.message)
             {
-                if (item.position != null)
+                var playerInfo = JsonUtility.FromJson<RecieveModels.PositionMessage.Player>(item);
+                if (!playersInstance.ContainsKey(playerInfo.id))
                 {
-                    playersInstance.Add(Instantiate(playerData.players[0]));
+                    
+                    playersInstance[playerInfo.id] = PlayerInstantiate();
+                    
+                    
+                    //pl.GetComponent<Player>().id = playerInfo.id;
                 }
+                var pos = playerInfo.position;
+                playersInstance[playerInfo.id].transform.position = new Vector3(pos.x,pos.y,pos.z);
             }
             
         }
+        //var ser =  JsonSerializer.Deserialize(jsonData,typeof(RecieveModels.PositionMessage)) as RecieveModels.PositionMessage;
+       // var mes = JsonUtility.FromJson<RecieveModels.PositionMessage>(jsonData);   
+
+        //Debug.Log();
+        //var s_mes = Encoding.UTF8.GetString(data);
+        //Debug.Assert(mes != null, " WS received message: " + Encoding.UTF8.GetString(data));
+        //Debug.Log(playersInstance?.Count);
+#if DEBUG_SERVER_CONNECT
+       
+        
+#endif  
+        /*
         for (int i = 0; i < playersInstance.Count; i++)
         {
-            var pos = mes.message.players[i].position;
+            var pos = JsonUtility.FromJson<RecieveModels.PositionMessage.Player.PositionVector3>(mes.message.players[i].position);
             playersInstance[i].transform.position = new Vector3(pos.x,pos.y,pos.z);
         }
-        Debug.Log("WS received message: " + Encoding.UTF8.GetString(data));
+        */
+        Debug.Log("WS : " + Encoding.UTF8.GetString(data));
     }
     void Update()
     {

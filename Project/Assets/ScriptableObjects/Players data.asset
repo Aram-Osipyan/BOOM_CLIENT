@@ -12,3 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 972e50ff8e9c64745943b0c0bbf9321f, type: 3}
   m_Name: Players data
   m_EditorClassIdentifier: 
+  players:
+  - {fileID: 19678132723352133, guid: fe5b6037682180846bf387e4324220e1, type: 3}
+  bombs: []

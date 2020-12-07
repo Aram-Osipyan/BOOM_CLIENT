@@ -47,11 +47,11 @@ class SendUtility
         this.channel = _channel;
         Channel channel = new Channel(_channel);
         Subscribe sb = new Subscribe("subscribe", JsonUtility.ToJson(channel));
-        webSocket.Send(Encoding.ASCII.GetBytes( JsonUtility.ToJson(sb)));
+        webSocket.Send(JsonUtility.ToJson(sb));
     }
     public void Send(string data)
     {
-        webSocket.Send(Encoding.ASCII.GetBytes(data));
+        webSocket.Send(data);
     }
     public void Send(byte[] data)
     {

@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public new string name;
     [SerializeField] GameObject player;
+    [SerializeField] public PlayerData playerData;
     private void Awake()
     {
        
