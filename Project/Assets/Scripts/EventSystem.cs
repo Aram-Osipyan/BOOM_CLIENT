@@ -81,7 +81,31 @@ public class EventSystem : MonoBehaviour
         {
             var jwt = JsonUtility.FromJson<SendModels.JWT>(uwr.downloadHandler.text);
             GameManager.instance.token = jwt.jwt;
-            Debug.Log("Received: " + uwr.downloadHandler.text);
+            Debug.Log("Auth: " + uwr.downloadHandler.text);
+            StartCoroutine(GetId());
+
+        }
+    }
+    IEnumerator GetId()
+    {
+        var url = SendModels.RemoteSettings.getIdUrl;
+        var uwr = new UnityWebRequest(url, "GET");
+        uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+        uwr.SetRequestHeader("Authorization", "Bearer "+GameManager.instance.token);
+
+        //Send the request then wait here until it returns
+        yield return uwr.SendWebRequest();
+
+        if (uwr.isNetworkError)
+        {
+            Debug.Log("Error While Sending: " + uwr.error);
+        }
+        else
+        {
+            var player = JsonUtility.FromJson<RecieveModels.Player>(uwr.downloadHandler.text);
+            Debug.Log("Get ID : " + uwr.downloadHandler.text);
+            GameManager.instance.id = player.id ?? "";
+            GameManager.instance.name = player.name ?? "";
             forClose.SetActive(false);// Close auth form
             GameManager.instance.GameStart();// start SyncPosition script
 

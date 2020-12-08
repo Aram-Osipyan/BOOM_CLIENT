@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public string id { get; set; }
+    public string id;
     void Start()
     {
         

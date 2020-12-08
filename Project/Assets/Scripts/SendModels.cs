@@ -11,6 +11,7 @@ namespace SendModels
         public const string rootUrl = "ws://localhost:3000/cable";
         public const string authorithateUrl = "http://localhost:3000/player_token";
         public const string authentificateUrl = "http://localhost:3000/player";
+        public const string getIdUrl = authentificateUrl;
     }
     [Serializable]
     class Subscribe

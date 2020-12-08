@@ -1939,7 +1939,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0604b693c3230284397a29a1103d5163, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  force: 5
+  force: 2
 --- !u!4 &1654093810
 Transform:
   m_ObjectHideFlags: 0
