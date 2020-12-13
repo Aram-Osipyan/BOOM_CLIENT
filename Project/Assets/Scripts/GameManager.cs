@@ -24,7 +24,9 @@ public class GameManager : MonoBehaviour
 
     public void GameStart()
     {
-        player.AddComponent<SyncPosition>();
+        //player.AddComponent<SyncPosition>();
+        player.GetComponent<SyncPosition>().enabled = true;
+        
     }
     void Update()
     {

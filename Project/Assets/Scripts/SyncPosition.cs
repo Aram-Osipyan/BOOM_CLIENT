@@ -37,6 +37,7 @@ public class SyncPosition : MonoBehaviour
         data = new PositionData("recieve");
         WebSocketInit();
         SelfInit();
+        
     }
 
     private void SelfInit()
@@ -81,6 +82,7 @@ public class SyncPosition : MonoBehaviour
         }
         
         var mes = JsonUtility.FromJson<RecieveModels.PositionMessage>(jsonData);
+        Debug.Log("COUNT PL : " + mes.message.Length);
         foreach (var item in mes.message)
         {
             var playerInfo = JsonUtility.FromJson<RecieveModels.PositionMessage.Player>(item);
@@ -108,7 +110,7 @@ public class SyncPosition : MonoBehaviour
             playersInstance[playerInfo.id] = Instantiate
                 (
                     GameManager.instance.playerData.players[0],
-                    positions[id].position,Quaternion.identity
+                    positions[id % playersCount].position,Quaternion.identity
                 );
         }
         var pos = playerInfo.position;
