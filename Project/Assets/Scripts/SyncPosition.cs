@@ -15,8 +15,8 @@ public class SyncPosition : MonoBehaviour
     /// change value for more efficienty
     /// </summary>
     [SerializeField] float timeBetweenSend = 0.1f;
-    public int playersCount = 5; 
-    
+    public int playersCount = 4;
+    [SerializeField] List<Transform> positions; 
 #if DEBUG_SYNC_POS
     [SerializeField] Text statusText;
 #endif
@@ -27,34 +27,23 @@ public class SyncPosition : MonoBehaviour
     private Channel channel = new Channel("PlayerPositionSyncChannel");
     private Subscribe sb ;
     private Dictionary<string, GameObject> playersInstance = new Dictionary<string, GameObject>();
-    private List<GameObject> playersPool;
-    private int playerPointer = 0;
-    private Queue<RecieveModels.PositionMessage.Player> playerProcQueue = new Queue<RecieveModels.PositionMessage.Player>();
+    private Queue<RecieveModels.PositionMessage.Player> playerProcQueue 
+        = new Queue<RecieveModels.PositionMessage.Player>();
+
     void Start()
     {
         Debug.Log("Start");
         sb = new Subscribe("message", JsonUtility.ToJson(channel));
         data = new PositionData("recieve");
         WebSocketInit();
-        PlayersInstatiate();
+        SelfInit();
     }
 
-    private void PlayersInstatiate()
+    private void SelfInit()
     {
-        playersPool = new List<GameObject>(playersCount);
-        for(int i = 0; i<playersCount; ++i)
-        {
-            playersPool.Add(Instantiate(GameManager.instance.playerData.players[0]));
-        }
+        transform.position = positions[int.Parse(GameManager.instance.id) % playersCount].position;
     }
-    private GameObject PlayerInstantiate()
-    {
-        if (playerPointer>=playersCount)
-        {
-            return null;
-        }
-        return playersPool[playerPointer++];
-    }
+
     private void WebSocketInit()
     {
         sendUtility = new SendUtility();
@@ -115,9 +104,12 @@ public class SyncPosition : MonoBehaviour
         }
         if (!playersInstance.ContainsKey(playerInfo.id))
         {
-
-            playersInstance[playerInfo.id] = PlayerInstantiate();
-
+            int id = int.Parse(playerInfo.id);
+            playersInstance[playerInfo.id] = Instantiate
+                (
+                    GameManager.instance.playerData.players[0],
+                    positions[id].position,Quaternion.identity
+                );
         }
         var pos = playerInfo.position;
         playersInstance[playerInfo.id].transform.position = new Vector3(pos.x, pos.y, pos.z);
